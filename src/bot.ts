@@ -13,7 +13,9 @@ export class TelegramBot {
     }
 
     private initializeHandlers() {
-        this.bot.start((ctx) => ctx.reply('Welcome! Send me a TikTok or Instagram Reels link to download.'));
+        this.bot.start(
+            (ctx) => ctx.reply('Скинь ссылку на TikTok или Instagram Reels и бот скачает видео')
+        );
         this.bot.on('text', this.handleMessage.bind(this));
 
         // Error handling
@@ -36,25 +38,12 @@ export class TelegramBot {
 
         if (isTikTok || isInstagram) {
             try {
-
-                // Get Info first to get metadata (like title/ext)?
-                // Or just stream it. Let's try to get info to send a caption if needed or filename options.
-                // For simplicity, just stream.
-
                 const stream = downloadStream(text);
-
-                // Send video
-                // ctx.replyWithVideo expects source to be fs.createReadStream or buffer or url.
-                // It supports Readable stream.
-                await ctx.replyWithVideo({ source: stream }, { caption: 'Here is your video!' });
-
+                await ctx.replyWithVideo({ source: stream });
             } catch (error) {
                 console.error('Download error:', error);
-                await ctx.reply('Sorry, detailed error: ' + (error instanceof Error ? error.message : String(error)));
+                await ctx.reply('Не удалось скачать видео.');
             }
-        } else {
-            // Optional: Reply that link is not supported or ignore
-            // await ctx.reply('Please send a valid TikTok or Instagram Reel link.');
         }
     }
 
