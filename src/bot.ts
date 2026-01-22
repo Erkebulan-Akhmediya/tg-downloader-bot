@@ -36,7 +36,6 @@ export class TelegramBot {
 
         if (isTikTok || isInstagram) {
             try {
-                await ctx.reply('Processing your link...');
 
                 // Get Info first to get metadata (like title/ext)?
                 // Or just stream it. Let's try to get info to send a caption if needed or filename options.

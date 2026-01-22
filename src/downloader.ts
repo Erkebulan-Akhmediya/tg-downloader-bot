@@ -4,7 +4,8 @@ import fs from 'fs';
 import path from 'path';
 
 // Helper to ensure yt-dlp binary exists
-const BINARY_PATH = path.join(process.cwd(), 'yt-dlp');
+const BINARY_FILENAME = process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp';
+const BINARY_PATH = path.join(process.cwd(), BINARY_FILENAME);
 
 // Initialize wrapper
 // Check if binary exists, if not, it should be downloaded.
