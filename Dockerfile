@@ -24,6 +24,16 @@ WORKDIR /app
 # Set production environment
 ENV NODE_ENV=production
 
+# Install curl to download yt-dlp
+RUN apt-get update && \
+    apt-get install -y curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Download yt-dlp binary to project root and make it executable
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
+    -o /app/yt-dlp && \
+    chmod +x /app/yt-dlp
+
 # Copy only necessary files from builder
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
