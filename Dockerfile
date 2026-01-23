@@ -24,9 +24,9 @@ WORKDIR /app
 # Set production environment
 ENV NODE_ENV=production
 
-# Install curl to download yt-dlp
+# Install curl to download yt-dlp and python3 (required by yt-dlp)
 RUN apt-get update && \
-    apt-get install -y curl ca-certificates && \
+    apt-get install -y curl ca-certificates python3 && \
     rm -rf /var/lib/apt/lists/*
 
 # Download yt-dlp binary to project root and make it executable
