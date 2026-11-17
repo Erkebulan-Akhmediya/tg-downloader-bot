@@ -1,9 +1,8 @@
 dist
-
 .env
-
 .idea
-
 .vscode
-
 node_modules
+yt-dlp
+yt-dlp.exe
+coverage

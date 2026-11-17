@@ -1,0 +1,9 @@
+.git
+.env
+node_modules
+dist
+coverage
+yt-dlp
+yt-dlp.exe
+.idea
+.vscode

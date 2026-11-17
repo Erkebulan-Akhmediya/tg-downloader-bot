@@ -1,0 +1,22 @@
+services:
+  bot:
+    build: .
+    image: tg-downloader-bot
+    container_name: tg-downloader-bot
+    env_file: .env
+    # Start again after crashes, Docker daemon restarts and host reboots
+    # (unless the container was stopped manually).
+    restart: unless-stopped
+    # Small init process that forwards signals and reaps yt-dlp child processes.
+    init: true
+    # Nothing is persisted: read-only filesystem, no volumes, scratch space in RAM only.
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m
+    mem_limit: 512m
+    # Keep logs from growing without bound.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
