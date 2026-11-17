@@ -5,15 +5,12 @@ WORKDIR /app
 
 # Copy dependency files first (better layer caching)
 COPY package*.json ./
-
-# Install dependencies exactly from package-lock.json
 RUN npm ci
 
-# Copy the rest of the project
-COPY . .
-
-# Build the project (creates dist/)
-RUN npm run build
+# Build the project (creates dist/), then drop dev dependencies
+COPY tsconfig.json ./
+COPY src ./src
+RUN npm run build && npm prune --omit=dev
 
 
 # ---------- Production stage ----------
@@ -21,25 +18,27 @@ FROM node:24.13.0-slim
 
 WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV=production
-
-# Install curl to download yt-dlp and python3 (required by yt-dlp)
+# python3 is required by yt-dlp; node (already in the image) is used by yt-dlp
+# as the JavaScript runtime for YouTube.
 RUN apt-get update && \
-    apt-get install -y curl ca-certificates python3 && \
+    apt-get install -y --no-install-recommends python3 ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# Download yt-dlp binary to project root and make it executable
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-    -o /app/yt-dlp && \
-    chmod +x /app/yt-dlp
+# yt-dlp is baked into the image. Rebuild the image to update it.
+ADD --chmod=755 https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp /usr/local/bin/yt-dlp
 
-# Copy only necessary files from builder
+ENV NODE_ENV=production \
+    YTDLP_PATH=/usr/local/bin/yt-dlp \
+    NODE_OPTIONS=--max-old-space-size=128
+
+# Copy only what is needed at runtime
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
-# No EXPOSE because your bot does not listen on HTTP ports
+# Run as an unprivileged user; the bot never writes to disk
+USER node
 
-# Start the application
-CMD ["npm", "run", "start"]
+# No EXPOSE: the bot uses long polling and does not listen on any port.
+# Run node directly (not via npm) so it receives SIGTERM for a graceful stop.
+CMD ["node", "dist/index.js"]
